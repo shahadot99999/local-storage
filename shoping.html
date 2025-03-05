@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Shopping Cart with Local Storage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .cart {
+            margin-top: 20px;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Advanced Shopping Cart with Local Storage</h1>
+    <div>
+        <label for="product">Product:</label>
+        <input type="text" id="product" placeholder="Enter product name">
+        
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" placeholder="Enter quantity" min="1">
+        
+        <button onclick="addToCart()">Add to Cart</button>
+    </div>
+
+    <div class="cart">
+        <h2>Cart</h2>
+        <div id="cart-items"></div>
+    </div>
+
+    <script>
+        // Retrieve cart from Local Storage or initialize an empty array
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        // Function to add a product to the cart
+        function addToCart() {
+            const product = document.getElementById('product').value.trim();
+            const quantity = parseInt(document.getElementById('quantity').value);
+
+            if (product && quantity > 0) {
+                // Check if the product already exists in the cart
+                const existingItemIndex = cart.findIndex(item => item.product === product);
+
+                if (existingItemIndex !== -1) {
+                    // If the product exists, update its quantity
+                    cart[existingItemIndex].quantity += quantity;
+                } else {
+                    // If the product doesn't exist, add it to the cart
+                    const item = { product, quantity };
+                    cart.push(item);
+                }
+
+                // Save the updated cart to Local Storage
+                saveCartToLocalStorage();
+                // Update the cart display
+                updateCartDisplay();
+            } else {
+                alert('Please enter a valid product and quantity.');
+            }
+        }
+
+        // Function to remove a product from the cart
+        function removeFromCart(index) {
+            cart.splice(index, 1); // Remove the item at the specified index
+            saveCartToLocalStorage(); // Save the updated cart to Local Storage
+            updateCartDisplay(); // Update the cart display
+        }
+
+        // Function to save the cart to Local Storage
+        function saveCartToLocalStorage() {
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        // Function to update the cart display
+        function updateCartDisplay() {
+            const cartItems = document.getElementById('cart-items');
+            cartItems.innerHTML = '';
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p>Your cart is empty.</p>';
+            } else {
+                cart.forEach((item, index) => {
+                    const itemElement = document.createElement('div');
+                    itemElement.classList.add('cart-item');
+                    itemElement.innerHTML = `
+                        <span>${item.product} (${item.quantity})</span>
+                        <button onclick="removeFromCart(${index})">Remove</button>
+                    `;
+                    cartItems.appendChild(itemElement);
+                });
+            }
+        }
+
+        // Load the cart from Local Storage when the page loads
+        window.onload = updateCartDisplay;
+    </script>
+</body>
+</html>
